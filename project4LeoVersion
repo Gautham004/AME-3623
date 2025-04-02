@@ -1,0 +1,54 @@
+#include <arduoino.h>
+
+void setup(){
+
+//set motor pins
+//pinMode(2, output);
+//pinmode(6, output);
+//pinnmode(9, output);
+const int motorPWMPins[3]= {2, 6, 9};
+const int motorDirPins[3]= {3, 7, 10};
+unsigned long last_fst_time = 0;
+const unsigned long fsm_interval = 50;
+
+
+}
+
+float bound(float value, float min_value, float max_value){
+    if(value < min_value){
+        return min_value;
+        Serial.print("value is less than min_value fn bound");
+    }
+    else if(value > max_value){
+        return max_value;
+        Serial.print("value is more then min value in fn bound");
+    }
+    else{
+        return value;
+        Serial.print("value is being returned as value in fn bound")
+    }
+}
+
+
+void set_motor(int motor, float val){
+    if(val > 64){
+        val = 64;
+        Serial.print("val is greater then 64 bound and is being bound - fn set_motor");
+    }
+    else if(val < -64){
+        val = -64
+        Serial.print("val is less then -64 bound and is being bound - fn set_motor");
+    }
+}
+    
+void set_motors(float val[3]){
+    const float negative_gain[3] = {1.0,1.0,1.0}
+}
+
+void loop{
+if(current_time - last_fsm_time > fsm_interval){
+fsm_task();
+last_fsm_time = current_time;
+
+}
+}
