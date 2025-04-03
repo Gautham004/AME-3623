@@ -7,7 +7,7 @@
 #include <Servo.h> // Include the Servo library
 
 PWMServo fan; // create servo object to control the fan
- const int CENTRAL_FAN_PWM = 9//*select pin* */; // Replace ??? with the Teensy PWM pin
+ const int CENTRAL_FAN_PWM = ???; // Replace ??? with the Teensy PWM pin
  for the central fan
  void fan_setup() {
  fan.attach(CENTRAL_FAN_PWM); // attaches the fan to specified
