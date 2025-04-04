@@ -6,20 +6,91 @@
 
 #include <Servo.h> // Include the Servo library
 
+
 PWMServo fan; // create servo object to control the fan
- const int CENTRAL_FAN_PWM = ???; // Replace ??? with the Teensy PWM pin
- for the central fan
+ const int CENTRAL_FAN_PWM = ???; // Select correct pin for central fan
+
+ // Setup function for central fan
  void fan_setup() {
- fan.attach(CENTRAL_FAN_PWM); // attaches the fan to specified
- // Arduino pin to the object
- delay(100);
- fan.write(20); // write low throttle
- delay(3000);
+    fan.attach(CENTRAL_FAN_PWM); // attaches the fan to specified
+    // Arduino pin to the object
+    delay(100);
+    fan.write(20); // write low throttle
+    delay(3000);
  }
+
+// Defining pins for lateral motors & switch (select the correct pins)
+const int LeftMotor_PWM =  ???;
+const int LeftMotor_INA =  ???;
+const int LeftMotor_INB =  ???;
+
+const int RightMotor_PWM = ???;      
+const int RightMotor_INA = ???;      
+const int RightMotor_INB = ???;      
+
+const int RearMotor_PWM =  ???;
+const int RearMotor_INA =  ???;
+const int RearMotor_INB =  ???;
+
+const int SWITCH_PIN = ???;
+
+// Defining constants for hovercraft control (idle, power limits in each direction, and fsm interval)
+const int Idle = 0;
+const float Min_Val = -102.0;
+const float Max_Val = 102.0;
+const int fsm_interval = 50;
+
+// Variables for FSM operation.
+int i;
+float Power = 0;  
+unsigned long current_time;
+unsigned long last_fsm_time;
+
+void setup () {
+    // Initialize serial communication.
+    Serial.begin(115200);
+    Serial.setTimeout(100000000);
+    delay(1000);
+
+    // Configurate the left motor control pins as an output.
+    pinMode(LeftMotor_PWM, OUTPUT);
+    pinMode(LeftMotor_INA, OUTPUT);
+    pinMode(LeftMotor_INB, OUTPUT);
+
+    // Configurate the right motor control pins as an output.
+    pinMode(RightMotor_PWM, OUTPUT);
+    pinMode(RightMotor_INA, OUTPUT);
+    pinMode(RightMotor_INB, OUTPUT);
+
+    // Configurate the rear motor control pins as an output.
+    pinMode(RearMotor_PWM, OUTPUT);
+    pinMode(RearMotor_INA, OUTPUT);
+    pinMode(RearMotor_INB, OUTPUT);
+
+    // Configure the swith pin as an input with a pull-up resistor.
+    pinMode(Switch_Pin, INPUT_PULLUP);
+}
 
 void set_hovercraft_forces(float fx, float fy, float torque){
 //     // Set thrust levels for the hovercraft
 }
+
+
+
+typedef enum state{
+    STATE_WAITING_FOR_SWITCH,
+    STATE_CENTRAL_FAN_ON,
+    STATE_CENTRAL_FAN_OFF,
+    STATE_WAIT_15,
+    STATE_WAIT_10,
+    STATE_POS_TORQUE,
+    STATE_NEG_TORQUE,
+    STATE_FORWARD_FORCE,
+    STATE_BACKWARD_FORCE,
+    STATE_RIGHT_FORCE,
+    STATE_LEFT_FORCE,
+} State;
+
 
 void fsm_step(){
     static int state = 0; // Current state
