@@ -96,6 +96,8 @@ void fsm_step(){
 
     static int state = STATE_WAITING_FOR_SWITCH; // Initial state
 
+    switch (state) {
+
         case STATE_WAITING_FOR_SWITCH: // Wait for switch to be pressed
             Serial.println("Waiting for switch to be pressed...\n");
             if (digitalRead(SWITCH_PIN) == HIGH) {
