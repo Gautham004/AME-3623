@@ -93,122 +93,149 @@ typedef enum state{
 
 
 void fsm_step(){
-    static int state = 0; // Current state
-    static unsigned long start_time = 0; // Time when the state started
 
-    switch (state) {
-        case 0: // Wait for switch to be pressed
-            if (digitalRead(SWITCH_PIN) == HIGH) { // Replace SWITCH_PIN with actual pin
-                state = 1;
-                stateStartTime = millis();
+    static int state = STATE_WAITING_FOR_SWITCH; // Initial state
+
+        case STATE_WAITING_FOR_SWITCH: // Wait for switch to be pressed
+            Serial.println("Waiting for switch to be pressed...\n");
+            if (digitalRead(SWITCH_PIN) == HIGH) {
+                serial.println("Switch pressed, starting sequence...\n");
+                state = STATE_CENTRAL_FAN_ON;
+                current_time = millis();
             }
             break;
 
-        case 1: // Set central fan to 25-40% duty cycle
+        case State STATE_CENTRAL_FAN_ON: // Set central fan to 25-40% duty cycle
             fan.write(64); // Example value for 25% duty cycle
-            state = 2;
-            stateStartTime = millis();
+            Serial.println("Central fan on...\n");
+            state = STATE_WAIT_15;
+            current_time = millis();
             break;
 
-        case 2: // Wait for 15 seconds
-            if (millis() - stateStartTime >= 15000) {
-                state = 3;
+        case STATE_WAIT_15: // Wait for 15 seconds
+            if (millis() - current_time >= 15000) {
+                state = STATE_POS_TORQUE;
             }
             break;
 
-        case 3: // Generate positive torque for 10 seconds
+        case STATE_POS_TORQUE: // Generate positive torque for 10 seconds
             set_hovercraft_forces(0, 0, 1.0); // Example positive torque
-            state = 4;
-            stateStartTime = millis();
-            break;
-
-        case 4: // Generate negative torque for 10 seconds
-            if (millis() - stateStartTime >= 10000) {
-                set_hovercraft_forces(0, 0, -1.0); // Example negative torque
-                state = 5;
-                stateStartTime = millis();
+            serial.println("Generating positive torque...\n");
+            if (millis() - current_time >= 10000) {
+                set_hovercraft_forces(0, 0, 0); // Stop torque
+                state = STATE_NEG_TORQUE;
+                current_time = millis();
             }
             break;
 
-        case 5: // Turn off the central fan
+        case STATE_NEG_TORQUE: // Generate negative torque for 10 seconds
+            set_hovercraft_forces(0, 0, -1.0); // Example negative torque
+            serial.println("Generating negative torque...\n");
+            if (millis() - current_time >= 10000) {
+                set_hovercraft_forces(0, 0, 0); // Stop torque
+                state = STATE_CENTRAL_FAN_OFF;
+                current_time = millis();
+            }
+            break;
+
+        case STATE_CENTRAL_FAN_OFF: // Turn off the central fan
             fan.write(0); // Turn off fan
-            state = 6;
-            stateStartTime = millis();
+            Serial.println("Central fan off...\n");
+            state = STATE_WAIT_15;
+            current_time = millis();
             break;
 
-        case 6: // Wait for 15 seconds
-            if (millis() - stateStartTime >= 15000) {
-                state = 7;
+        case STATE_WAIT_15: // Wait for 15 seconds
+            serial.println("Waiting for 15 seconds...\n");
+            if (millis() - current_time >= 15000) {
+                state = STATE_CENTRAL_FAN_ON;
             }
             break;
 
-        case 7: // Turn on the central fan
+        case STATE_CENTRAL_FAN_ON: // Turn on the central fan
             fan.write(64); // Example value for 25% duty cycle
-            state = 8;
-            stateStartTime = millis();
+            Serial.println("Central fan on...\n");
+            state = STATE_WAIT_10;
+            current_time = millis();
             break;
 
-        case 8: // Wait for 10 seconds
-            if (millis() - stateStartTime >= 10000) {
-                state = 9;
+        case STATE_WAIT_10: // Wait for 10 seconds
+            serial.println("Waiting for 10 seconds...\n");
+            if (millis() - current_time >= 10000) {
+                state = STATE_FORWARD_FORCE;
             }
             break;
 
-        case 9: // Generate forward force for 10 seconds
+        case STATE_FORWARD_FORCE: // Generate forward force for 10 seconds
             set_hovercraft_forces(1.0, 0, 0); // Example forward force
-            state = 10;
-            stateStartTime = millis();
-            break;
-
-        case 10: // Generate backward force for 10 seconds
-            if (millis() - stateStartTime >= 10000) {
-                set_hovercraft_forces(-1.0, 0, 0); // Example backward force
-                state = 11;
-                stateStartTime = millis();
+            serial.println("Generating forward force...\n");
+            if (millis() - current_time >= 10000) {
+                set_hovercraft_forces(0, 0, 0); // Stop forward force
+                state = STATE_BACKWARD_FORCE;
+                current_time = millis();
             }
             break;
 
-        case 11: // Turn off the central fan
+        case STATE_BACKWARD_FORCE: // Generate backward force for 10 seconds
+            set_hovercraft_forces(-1.0, 0, 0); // Example backward force
+            serial.println("Generating backward force...\n");
+            if (millis() - current_time >= 10000) {
+                set_hovercraft_forces(0, 0, 0); // Stop backward force
+                state = STATE_CENTRAL_FAN_OFF;
+                current_time = millis();
+            }
+            break;
+
+        case STATE_CENTRAL_FAN_OFF: // Turn off the central fan
             fan.write(0); // Turn off fan
-            state = 12;
-            stateStartTime = millis();
+            Serial.println("Central fan off...\n");
+            state = STATE_WAIT_15;
+            current_time = millis();
             break;
 
-        case 12: // Wait for 15 seconds
-            if (millis() - stateStartTime >= 15000) {
-                state = 13;
+        case STATE_WAIT_15: // Wait for 15 seconds
+            serial.println("Waiting for 15 seconds...\n");
+            if (millis() - current_time >= 15000) {
+                state = STATE_CENTRAL_FAN_OFF;
             }
             break;
 
-        case 13: // Turn on the central fan
+        case STATE_CENTRAL_FAN_ON: // Turn on the central fan
             fan.write(64); // Example value for 25% duty cycle
-            state = 14;
-            stateStartTime = millis();
+            Serial.println("Central fan on...\n");
+            state = STATE_WAIT_10;
+            current_time = millis();
             break;
 
-        case 14: // Wait for 10 seconds
-            if (millis() - stateStartTime >= 10000) {
-                state = 15;
+        case STATE_WAIT_10: // Wait for 10 seconds
+            if (millis() - current_time >= 10000) {
+                state = STATE_RIGHT_FORCE;
             }
             break;
 
-        case 15: // Generate rightward force for 10 seconds
+        case STATE_RIGHT_FORCE: // Generate rightward force for 10 seconds
             set_hovercraft_forces(0, 1.0, 0); // Example rightward force
-            state = 16;
-            stateStartTime = millis();
-            break;
-
-        case 16: // Generate leftward force for 10 seconds
-            if (millis() - stateStartTime >= 10000) {
-                set_hovercraft_forces(0, -1.0, 0); // Example leftward force
-                state = 17;
-                stateStartTime = millis();
+            serial.println("Generating rightward force...\n");
+            if (millis() - current_time >= 10000) {
+                set_hovercraft_forces(0, 0, 0); // Stop rightward force
+                state = STATE_LEFT_FORCE;
+                current_time = millis();
             }
             break;
 
-        case 17: // Turn off the central fan
+        case STATE_LEFT_FORCE: // Generate leftward force for 10 seconds
+            set_hovercraft_forces(0, -1.0, 0); // Example leftward force
+            serial.println("Generating leftward force...\n");
+            if (millis() - current_time >= 10000) {
+                set_hovercraft_forces(0, 0, 0); // Stop leftward force
+                state = STATE_CENTRAL_FAN_OFF;
+                current_time = millis();
+            }
+            break;
+
+        case STATE_CENTRAL_FAN_OFF: // Turn off the central fan
             fan.write(0); // Turn off fan
-            state = 0; // Return to waiting for the switch
+            state = STATE_WAITING_FOR_SWITCH; // Return to waiting for the switch
             break;
     }
 }
