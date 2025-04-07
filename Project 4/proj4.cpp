@@ -1,6 +1,10 @@
 // Pin Definitions
-const int MOTOR_PINS[3] = {5, 6, 9};  // PWM pins for the three motors
+const int MOTOR_PINS[3] = {3, 6, 9};  // PWM pins for the three motors
 const int SWITCH_PIN = 2;  // Input switch pin
+
+const int ina1 = 28;
+const int inb1 = 27;
+
 
 // FSM Timing Variables
 unsigned long fsm_interval = 50;
