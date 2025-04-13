@@ -6,7 +6,7 @@ void setup(){
 //pinMode(2, output);
 //pinmode(6, output);
 //pinnmode(9, output);
-const int motorPWMPins[3]= {2, 6, 9};
+const int motorPWMPins[3]= {3, 6, 9};
 const int motorDirPins[3]= {3, 7, 10};
 unsigned long last_fst_time = 0;
 const unsigned long fsm_interval = 50;
@@ -21,7 +21,7 @@ float bound(float value, float min_value, float max_value){
     }
     else if(value > max_value){
         return max_value;
-        Serial.print("value is more then min value in fn bound");
+        Serial.print("value is more than min value in fn bound");
     }
     else{
         return value;
@@ -42,13 +42,114 @@ void set_motor(int motor, float val){
 }
     
 void set_motors(float val[3]){
-    const float negative_gain[3] = {1.0,1.0,1.0}
+// input looks like this val[2, 3 ,4] // corresponding to the value of each motors direction and thrust
+// direction is determined by polarity (negative or positive) and the magnitude is going to be how strong
+    
+//this affects the total gain - if the value is negative applies the scalr provided
+const float negative_gain[3] = {1.0,1.0,1.0}
+    if(val[1] > 0){
+        val[1] = val[1] * -negative_gain[1];
+    }
+    if(val[2] > 0){
+        val[2] = val[2] * -negative_gain[2];
+    }
+    if(val[3] > 0){
+        val[3] = val[3] * -negative_gain[3];
+    }
+    //create the bounding logic
+
+    //starting with value 1
+    if(val[1] > 64)
+        val [1] = 64; 
+        printf("val 1 is bounded to 64");
+    else if(val[1] < -64){
+        val[1] = -64;
+        printf("val 1 is bounded to -64");
+    }
+    //value 1 is done bounding - value 2 start bounding
+    if(val[2] > 64){
+        val[2] = 64;
+        printf("val 2 bounded to 64");
+    }
+    else if(val[2] < -64){
+        val[2] = -64;
+        printf("val 2 bounded to -64");
+    }
+    //value 2 is done bounding - value 3 start bounding
+    if(val[3] > 64){
+        val[3] = 64;
+        printf("val 3 is bounded to 64");
+    }
+    else if(val[3] < -64){
+        val[3] = -64;
+        printf("val 3 is bounded to -64");
+    }
+    //writes a value to each motor after bounding them to ensure safety margins
+    analogWrite(motorPWMPins[1], val[1]);
+    analogWrite(motorPWMPins[2], val[2]);
+    analogWrite(motorPWMPins[3], val[3]);
+}
+
+void fsm_step(State current_state){
+    switch(current_state){
+        case State_start:
+        //introduce the switch logic
+        serial.println("waiting for switch to be pressed");
+        if(digitalRead(2) == HIGH){
+            current_state = State_L25;
+            Serial.println("switch pressed, moving to L25");
+        }
+        break;
+        case State_L25:
+        //set left motor to 25%
+        set_motor(1, 25)
+        break;
+        case State_R25:
+        //set right motor to 25$
+        set_motor(2, 25)
+        break;
+        case State_B25:
+        //set both motors to 25%
+        set_motor(3, 25);
+        break;
+        case State_Down25:
+        //set all motors to -25%
+        set_motors(-64, -64, -64);
+
+        case State_L0:
+        //set left motor to 0%
+        set_motor(1, 0
+        break;
+        case State_R0:
+        //set right motor to 0%
+        set_motor(2,0);
+        break;
+        case State_B0:
+        set_motor(3,0);
+        break;a   
+    }
+
+
+
 }
 
 void loop{
+    unsigned long current_time = millis();
 if(current_time - last_fsm_time > fsm_interval){
-fsm_task();
+fsm_task(fsm_step);
 last_fsm_time = current_time;
 
+        }
+// State enumeration
+typedef enum {
+    State_start,
+    State_L25,
+    State_R25,
+    State_B25,
+    State_Down25,
+    State_L0,
+    State_R0,
+    State_B0,
+} State;
 }
-}
+
