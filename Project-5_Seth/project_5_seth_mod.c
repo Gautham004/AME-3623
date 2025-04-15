@@ -59,6 +59,182 @@ int counter = 0;
 // starting the hovercraft in the start state
 State currentState = STATE_START;
 
+// each state function maps to a state. you can call a state's function
+// like this!
+void start_handler() {
+    // if the switch is pressed (LOW), transition to STATE_LIFT_UP
+    if (digitalRead(SWITCH_PIN) == HIGH) {
+        currentState = STATE_LIFT_UP;
+    }
+    break;
+}
+void lift_up_handler() {
+    fan.write(90);
+
+    // after 300 cycles (15 seconds), transition to the next state 
+    // (STATE_POSITIVE_TORQUE) and reset the counter
+    if (++counter >= 300) {
+        currentState = STATE_POSITIVE_TORQUE;
+        counter = 0;
+    }
+    break;
+}
+void positive_torque_handler() {
+    set_hovercraft_forces(0, 0, 10);
+
+    // after 300 cycles (15 seconds), transition to the next state 
+    // (STATE_NEGATIVE_TORQUE) and reset the counter
+    if (++counter >= 300) {
+        currentState = STATE_NEGATIVE_TORQUE;
+        counter = 0;
+    }
+    break;
+}
+void negative_torque_handler() {
+    set_hovercraft_forces(0, 0, -10);
+
+    // after 300 cycles (15 seconds), transition to the next state 
+    // (STATE_FANS_OFF_1) and reset counter
+    if (++counter >= 300) {
+        currentState = STATE_FANS_OFF_1;
+        counter = 0;
+    }
+    break;
+}
+void fans_off_1_handler() {
+    set_hovercraft_forces(0, 0, 0);
+    fan.write(0);
+
+    // after 300 cycles (15 seconds), transition to the next state (STATE_LIFT_UP_2) 
+    // and reset counter
+    if (++counter >= 300) {
+        currentState = STATE_LIFT_UP_2;
+        counter = 0;
+    }
+    break;
+
+}
+void lift_up_2_handler() {
+    fan.write(90);
+
+    // after 200 cycles (10 seconds), transition to the next state 
+    // (STATE_FORWARD_FORCE) and reset counter
+    if (++counter >= 200) {
+        currentState = STATE_FORWARD_FORCE;
+        counter = 0;
+    }
+    break;
+}
+void forward_force_handler() {
+    set_hovercraft_forces(10, 0, 0);
+            
+    // after 300 cycles (15 seconds), transition to the next state 
+    // (STATE_BACKWARD_FORCE) and reset counter
+    if (++counter >= 300) {
+        currentState = STATE_BACKWARD_FORCE;
+        counter = 0;
+    }
+    break;    
+}
+void backward_force_handler() {
+    set_hovercraft_forces(-10, 0, 0);
+
+    // after 300 cycles (15 seconds), transition to the next state 
+    // (STATE_FANS_OFF_2)
+    if (++counter >= 300) {
+        currentState = STATE_FANS_OFF_2;
+        counter = 0;
+    }
+    break;
+}
+void fans_off_2_handler() {
+    set_hovercraft_forces(0, 0, 0);
+    fan.write(0);
+
+    // after 300 cycles (15 seconds), transition to the next state 
+    // (STATE_LIFT_UP_3)
+    if (++counter >= 300) {
+        currentState = STATE_LIFT_UP_3;
+        counter = 0;
+    }
+    break;
+}
+void lift_up_3_handler() {
+    fan.write(90);
+
+    // after 200 cycles (10 seconds), transition to the next state 
+    // (STATE_RIGHT_FORCE)
+    if (++counter >= 200) {
+        currentState = STATE_RIGHT_FORCE;
+        counter = 0;
+    }
+    break;
+}
+void right_force_handler() {
+    set_hovercraft_forces(0, -10, 0);
+				
+    // after 300 cycles (15 seconds), transition to the next state 
+    // (STATE_LEFT_FORCE)
+    if (++counter >= 300) {
+        currentState = STATE_LEFT_FORCE;
+        counter = 0;
+    }
+    break;
+}
+void left_force_handler() {
+    set_hovercraft_forces(0, 10, 0);
+		
+    // after 300 cycles (15 seconds), transition to the next state 
+    // (STATE_FANS_OFF_3)
+    if (++counter >= 300) {
+        currentState = STATE_FANS_OFF_3;
+        counter = 0;
+    }
+    break;
+}
+void fans_off_3_handler() {
+    set_hovercraft_forces(0, 0, 0);
+    fan.write(0);
+
+    // after 300 cycles (15 seconds), transition to the next state 
+    // (STATE_START)
+    if (++counter >= 300) {
+        currentState = STATE_START;
+        counter = 0;
+    }
+    break;
+}
+
+void* map_state_machine(State state) {
+    switch (state) {
+        case STATE_START:
+            return (void*)start_handler;
+        case STATE_LIFT_UP:
+            return (void*)lift_up_handler;
+        case STATE_POSITIVE_TORQUE:
+            return (void*)positive_torque_handler;
+        case STATE_NEGATIVE_TORQUE:
+            return (void*)negative_torque_handler;
+        case STATE_FANS_OFF_1:
+            return (void*)fans_off_1_handler;
+        case STATE_LIFT_UP_2:
+            return (void*)lift_up_2_handler;
+        case STATE_FORWARD_FORCE:
+            return (void*)forward_force_handler;
+        case STATE_BACKWARD_FORCE:
+            return (void*)backward_force_handler;
+        case STATE_FANS_OFF_2:
+            return (void*)fans_off_2_handler;
+        case STATE_LIFT_UP_3:
+            return (void*)lift_up_3_handler;
+        case STATE_RIGHT_FORCE:
+            return (void*)right_force_handler;
+        case STATE_LEFT_FORCE:
+            return (void*)left_force_handler;
+        case STATE_FANS_OFF_3:
+            return (void*)fans_off_3_handler;
+    }
+
 void setup() {
 
   /* 
@@ -257,183 +433,10 @@ void fsm_step() {
    time (counter) and the state of the switch (SWICH_PIN)
   */
 
+    // handlle each case of the fsm
+    map_state_machine()();
 
-// switch statement to handle different states of the fsm
-    switch (currentState) {
-
-
-// STATE_START: waiting for the switch to be pressed
-        case STATE_START:
-
-
-// if the switch is pressed (LOW), transition to STATE_LIFT_UP
-            if (digitalRead(SWITCH_PIN) == HIGH) {
-                currentState = STATE_LIFT_UP;
-            }
-            break;
-
-
-
-// STATE_LIFT_UP: set central fan to a 25-40% duty cycle (255 = 100% duty cycle)
-        case STATE_LIFT_UP:
-            fan.write(90);
-
-// after 300 cycles (15 seconds), transition to the next state (STATE_POSITIVE_TORQUE) and reset the counter
-            if (++counter >= 300) {
-                currentState = STATE_POSITIVE_TORQUE;
-                counter = 0;
-            }
-            break;
-
-
-
-// STATE_POSITIVE_TORQUE: ramp up motors 0, 1, and 2 to the duty cycle speed to create a positive torque
-        case STATE_POSITIVE_TORQUE:
-            set_hovercraft_forces(0, 0, 10);
-
-// after 300 cycles (15 seconds), transition to the next state (STATE_NEGATIVE_TORQUE) and reset the counter
-            if (++counter >= 300) {
-                currentState = STATE_NEGATIVE_TORQUE;
-                counter = 0;
-            }
-            break;
-
-
-
-// STATE_NEGATIVE_TORQUE: ramp down motors 0, 1, and 2 to the negative value of duty cycle
-        case STATE_NEGATIVE_TORQUE:
-           set_hovercraft_forces(0, 0, -10);
-
-// after 300 cycles (15 seconds), transition to the next state (STATE_FANS_OFF_1) and reset counter
-            if (++counter >= 300) {
-                currentState = STATE_FANS_OFF_1;
-                counter = 0;
-            }
-            break;
-
-
-
-// STATE_FANS_OFF_1: turn off the central fan and wait for 15 seconds
-        case STATE_FANS_OFF_1:
-			set_hovercraft_forces(0, 0, 0);
-            fan.write(0);
-
-// after 300 cycles (15 seconds), transition to the next state (STATE_LIFT_UP_2) and reset counter
-            if (++counter >= 300) {
-                currentState = STATE_LIFT_UP_2;
-                counter = 0;
-            }
-            break;
-
-
-
-// STATE_LIFT_UP_2: turn on central fan and wait for 10 seconds
-        case STATE_LIFT_UP_2:
-            fan.write(90);
-
-// after 200 cycles (10 seconds), transition to the next state (STATE_FORWARD_FORCE) and reset counter
-            if (++counter >= 200) {
-                currentState = STATE_FORWARD_FORCE;
-                counter = 0;
-            }
-            break;
-
-
-
-// STATE_FORWARD_FORCE: Move forwards (+x)
-        case STATE_FORWARD_FORCE:
-		set_hovercraft_forces(10, 0, 0);
-            
-// after 300 cycles (15 seconds), transition to the next state (STATE_BACKWARD_FORCE) and reset counter
-            if (++counter >= 300) {
-                currentState = STATE_BACKWARD_FORCE;
-                counter = 0;
-            }
-            break;
-
-
-
-// STATE_BACKWARD_FORCE: generate backward force by calling set_hovercraft_forces function
-        case STATE_BACKWARD_FORCE:
-        set_hovercraft_forces(-10, 0, 0);
-
-// after 300 cycles (15 seconds), transition to the next state (STATE_FANS_OFF_2)
-            if (++counter >= 300) {
-                currentState = STATE_FANS_OFF_2;
-                counter = 0;
-            }
-            break;
-
-
-    
-// STATE_FANS_OFF_2: turn off all fans
-        case STATE_FANS_OFF_2:
-            set_hovercraft_forces(0, 0, 0);
-            fan.write(0);
-
-// after 300 cycles (15 seconds), transition to the next state (STATE_LIFT_UP_3)
-            if (++counter >= 300) {
-                currentState = STATE_LIFT_UP_3;
-                counter = 0;
-            }
-            break;
-   
-
-   
-// STATE_LIFT_UP_3: turn on central fan for 10 seconds
-        case STATE_LIFT_UP_3:
-            fan.write(90);
-
-// after 200 cycles (10 seconds), transition to the next state (STATE_RIGHT_FORCE)
-            if (++counter >= 200) {
-                currentState = STATE_RIGHT_FORCE;
-                counter = 0;
-            }
-            break;
-    
-
-
-// STATE_RIGHT_FORCE: generate right force by calling set_hovercraft_forces function
-        case STATE_RIGHT_FORCE:
-        set_hovercraft_forces(0, -10, 0);
-				
-// after 300 cycles (15 seconds), transition to the next state (STATE_LEFT_FORCE)
-            if (++counter >= 300) {
-                currentState = STATE_LEFT_FORCE;
-                counter = 0;
-            }
-            break;
-			
-			
-			
-// STATE_LEFT_FORCE: generate left force by calling set_hovercraft_forces function
-        case STATE_LEFT_FORCE:
-        set_hovercraft_forces(0, 10, 0);
-		
-// after 300 cycles (15 seconds), transition to the next state (STATE_FANS_OFF_3)
-            if (++counter >= 300) {
-                currentState = STATE_FANS_OFF_3;
-                counter = 0;
-            }
-            break;
-
-
-
-// STATE_FANS_OFF_3: turn off all fans and return to start
-        case STATE_FANS_OFF_3:
-        set_hovercraft_forces(0, 0, 0);
-		    fan.write(0);
-
-// after 300 cycles (15 seconds), transition to the next state (STATE_START)
-            if (++counter >= 300) {
-                currentState = STATE_START;
-                counter = 0;
-            }
-            break;
-
-
-
-// print the current state to the serial monitor for debugging purposes
+    // print the current state to the serial monitor for debugging purposes
     Serial.printf("Current State: %d\n", currentState);
 	}
 }

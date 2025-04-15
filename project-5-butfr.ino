@@ -206,9 +206,38 @@ void set_hovercraft_forces(float fx, float fy, float torque) {
   int R = 5.5;
  
   // using inverse kinematics matrix to define the motor speeds
-  motor_values[0] = (fx/(2*cos(30))) - (fy/(2+2*sin(30))) - (torque/(2*R*(1+sin(30))));
-  motor_values[1] = (fx/(2*cos(30))) + (fy/(2+2*sin(30))) + (torque/(2*R*(1+sin(30))));
-  motor_values[2] = (-fy/(1+sin(30))) + (torque * sin(30)/(R*(1 + sin(30))));
+  motor_values[0] = -((fx/(2*cos(30))) - (fy/(2+2*sin(30))) - (torque/(2*R*(1+sin(30)))));
+  motor_values[1] = ((fx/(2*cos(30))) + (fy/(2+2*sin(30))) + (torque/(2*R*(1+sin(30)))));
+  motor_values[2] = ((-fy/(1+sin(30))) + (torque * sin(30)/(R*(1 + sin(30)))));
+  set_motors(motor_values);
+}
+void set_hovercraft_forces2(float fx, float fy, float torque) {
+
+  /*
+  set_hovercraft_forces function
+
+  Inputs: 
+  - fx
+  - fy
+  - torque
+
+  Outputs:
+  - motor_values[0]
+  - motor_values[1]
+  - motor_values[2]
+
+  Description:
+  This function uses inverse kinematics to determine how much each motor needs to work to
+  achieve the desired forces and torques.
+  */
+
+  // setting the radius of the hovercraft to 5.5 inches
+  int R = 5.5;
+ 
+  // using inverse kinematics matrix to define the motor speeds
+  motor_values[0] = -((fx/(2*cos(30))) - (fy/(2+2*sin(30))) - (torque/(2*R*(1+sin(30))))) * .5; //scalar multiplier to nerf overpowered fan
+  motor_values[1] = ((fx/(2*cos(30))) + (fy/(2+2*sin(30))) + (torque/(2*R*(1+sin(30)))));
+  motor_values[2] = -((-fy/(1+sin(30))) + (torque * sin(30)/(R*(1 + sin(30)))));
   set_motors(motor_values);
 }
 
