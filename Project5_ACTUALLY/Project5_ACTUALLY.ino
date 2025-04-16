@@ -207,7 +207,7 @@ void set_hovercraft_forces(float fx, float fy, float torque) {
  
   // using inverse kinematics matrix to define the motor speeds
   motor_values[0] = ((fx/(2*cos(30))) - (fy/(2+2*sin(30))) - (torque/(2*R*(1+sin(30)))));
-  motor_values[1] = ((fx/(2*cos(30))) + (fy/(2+2*sin(30))) + (torque/(2*R*(1+sin(30)))));
+  motor_values[1] = ((fx/(2*cos(30))) + (fy/(2+2*sin(30))) + (torque/(2*R*(1+sin(30)))))*.5;
   motor_values[2] = ((-fy/(1+sin(30))) + (torque * sin(30)/(R*(1 + sin(30)))));
   set_motors(motor_values);
 }
@@ -238,7 +238,7 @@ void set_hovercraft_forces2(float fx, float fy, float torque) {
   int R = 5.5;
  
   // using inverse kinematics matrix to define the motor speeds
-  motor_values[0] = ((fx/(2*cos(30))) - (fy/(2+2*sin(30))) - (torque/(2*R*(1+sin(30))))) * .5; //scalar multiplier to nerf overpowered fan
+  motor_values[0] = ((fx/(2*cos(30))) - (fy/(2+2*sin(30))) - (torque/(2*R*(1+sin(30))))) * .75; //scalar multiplier to nerf overpowered fan
   motor_values[1] = ((fx/(2*cos(30))) + (fy/(2+2*sin(30))) + (torque/(2*R*(1+sin(30)))));
   motor_values[2] = ((-fy/(1+sin(30))) + (torque * sin(30)/(R*(1 + sin(30)))));
   set_motors(motor_values);
@@ -321,7 +321,7 @@ void fsm_step() {
 
 // STATE_POSITIVE_TORQUE: ramp up motors 0, 1, and 2 to the duty cycle speed to create a positive torque
         case STATE_POSITIVE_TORQUE:
-            set_hovercraft_forces(0, 0, 30);
+            set_hovercraft_forces(0, 0, 60);
 
 // after 300 cycles (15 seconds), transition to the next state (STATE_NEGATIVE_TORQUE) and reset the counter
             if (++counter >= 300) {
@@ -374,7 +374,7 @@ void fsm_step() {
 
 // STATE_FORWARD_FORCE: Move forwards (+x)
         case STATE_FORWARD_FORCE:
-		set_hovercraft_forces(-40, 0, 0);
+		set_hovercraft_forces(-60, 0, 0);
             
 // after 300 cycles (15 seconds), transition to the next state (STATE_BACKWARD_FORCE) and reset counter
             if (++counter >= 300) {
@@ -387,7 +387,7 @@ void fsm_step() {
 
 // STATE_BACKWARD_FORCE: generate backward force by calling set_hovercraft_forces function
         case STATE_BACKWARD_FORCE:
-        set_hovercraft_forces(40, 0, 0);
+        set_hovercraft_forces(60, 0, 0);
 
 // after 300 cycles (15 seconds), transition to the next state (STATE_FANS_OFF_2)
             if (++counter >= 300) {
@@ -427,7 +427,7 @@ void fsm_step() {
 
 // STATE_RIGHT_FORCE: generate right force by calling set_hovercraft_forces function
         case STATE_RIGHT_FORCE:
-        set_hovercraft_forces(0, -40, 0);
+        set_hovercraft_forces(0, -60, 0);
 				
 // after 300 cycles (15 seconds), transition to the next state (STATE_LEFT_FORCE)
             if (++counter >= 300) {
@@ -440,7 +440,7 @@ void fsm_step() {
 			
 // STATE_LEFT_FORCE: generate left force by calling set_hovercraft_forces function
         case STATE_LEFT_FORCE:
-        set_hovercraft_forces(0, 40, 0);
+        set_hovercraft_forces(0, 60, 0);
 		
 // after 300 cycles (15 seconds), transition to the next state (STATE_FANS_OFF_3)
             if (++counter >= 300) {
