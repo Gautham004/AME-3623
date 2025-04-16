@@ -30,6 +30,12 @@ const int CENTRAL_FAN_PWM = 23; // Initializing the Teensy PWM pin connected to 
 #define DUTY_CYCLE 64 // 25% of 255
 #define FSM_INTERVAL 50 // Interval for FSM updates
 
+
+//define the IMU Pins
+#define BNO055_SDA 18;
+#define BNO055_SCL 19;
+
+
 // global declaration
 float motor_values[3] = {0, 0, 0};
 
