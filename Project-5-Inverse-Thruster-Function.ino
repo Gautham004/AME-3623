@@ -10,17 +10,17 @@ Servo fan; // create servo object to control the fan
 const int CENTRAL_FAN_PWM = 23; // Initializing the Teensy PWM pin connected to the central fan (pin 23)
 
 
-// defining the pwm, inA, and inB pins for Fan 1
+// defining the pwm, inA, and inB pins for right fan
 #define FAN1_PWM 9
 #define FAN1_INA 28
 #define FAN1_INB 27
 
-// defining the pwm, inA, and inB pins for Fan 2
+// defining the pwm, inA, and inB pins for left fan
 #define FAN2_PWM 6 // stays the same
 #define FAN2_INA 30
 #define FAN2_INB 29
 
-// defining the pwm, inA, and inB pins for Fan 3
+// defining the pwm, inA, and inB pins for Rear fan 
 #define FAN3_PWM 3 //reversing with fan 1
 #define FAN3_INA 32
 #define FAN3_INB 31
@@ -206,9 +206,9 @@ void set_hovercraft_forces(float fx, float fy, float torque) {
   int R = 5.5;
  
   // using inverse kinematics matrix to define the motor speeds
-  motor_values[0] = ((fx/(2*cos(30))) - (fy/(2+2*sin(30))) - (torque/(2*R*(1+sin(30)))));
-  motor_values[1] = ((fx/(2*cos(30))) + (fy/(2+2*sin(30))) + (torque/(2*R*(1+sin(30)))))*.5;
-  motor_values[2] = ((-fy/(1+sin(30))) + (torque * sin(30)/(R*(1 + sin(30)))));
+  motor_values[0] = ((fx/(2*cos(30))) - (fy/(2+2*sin(30))) - (torque/(2*R*(1+sin(30))))); //right 
+  motor_values[1] = ((fx/(2*cos(30))) + (fy/(2+2*sin(30))) + (torque/(2*R*(1+sin(30))))); //left
+  motor_values[2] = ((-fy/(1+sin(30))) + (torque * sin(30)/(R*(1 + sin(30))))); //rear
   set_motors(motor_values);
 }
 
@@ -238,9 +238,9 @@ void set_hovercraft_forces2(float fx, float fy, float torque) { //second hovercr
   int R = 5.5;
  
   // using inverse kinematics matrix to define the motor speeds
-  motor_values[0] = ((fx/(2*cos(30))) - (fy/(2+2*sin(30))) - (torque/(2*R*(1+sin(30))))) * .75; //scalar multiplier to nerf overpowered fan
-  motor_values[1] = ((fx/(2*cos(30))) + (fy/(2+2*sin(30))) + (torque/(2*R*(1+sin(30))))) * .75; //scalar multiplier to nerf overpowered fan
-  motor_values[2] = ((-fy/(1+sin(30))) + (torque * sin(30)/(R*(1 + sin(30))))); //no multiplier here - this should remain the same as to ensure the blue fan has the highest output
+  motor_values[0] = ((fx/(2*cos(30))) - (fy/(2+2*sin(30))) - (torque/(2*R*(1+sin(30))))); //scalar multiplier to nerf overpowered fan (right)
+  motor_values[1] = ((fx/(2*cos(30))) + (fy/(2+2*sin(30))) + (torque/(2*R*(1+sin(30))))) * .2; //scalar multiplier to nerf overpowered fan (left)
+  motor_values[2] = ((-fy/(1+sin(30))) + (torque * sin(30)/(R*(1 + sin(30))))); //no multiplier here - this should remain the same as to ensure the blue fan has the highest output (rear)
   set_motors(motor_values);
 }
 
