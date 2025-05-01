@@ -10,17 +10,17 @@ Servo fan; // create servo object to control the fan
 const int CENTRAL_FAN_PWM = 23; // Initializing the Teensy PWM pin connected to the central fan (pin 23)
 
 
-// defining the pwm, inA, and inB pins for Fan 1
+// defining the pwm, inA, and inB pins for right fan
 #define FAN1_PWM 9
 #define FAN1_INA 28
 #define FAN1_INB 27
 
-// defining the pwm, inA, and inB pins for Fan 2
+// defining the pwm, inA, and inB pins for left fan
 #define FAN2_PWM 6 // stays the same
 #define FAN2_INA 30
 #define FAN2_INB 29
 
-// defining the pwm, inA, and inB pins for Fan 3
+// defining the pwm, inA, and inB pins for Rear fan 
 #define FAN3_PWM 3 //reversing with fan 1
 #define FAN3_INA 32
 #define FAN3_INB 31
@@ -206,9 +206,41 @@ void set_hovercraft_forces(float fx, float fy, float torque) {
   int R = 5.5;
  
   // using inverse kinematics matrix to define the motor speeds
-  motor_values[0] = (fx/(2*cos(30))) - (fy/(2+2*sin(30))) - (torque/(2*R*(1+sin(30))));
-  motor_values[1] = (fx/(2*cos(30))) + (fy/(2+2*sin(30))) + (torque/(2*R*(1+sin(30))));
-  motor_values[2] = (-fy/(1+sin(30))) + (torque * sin(30)/(R*(1 + sin(30))));
+  motor_values[0] = -((fx/(2*cos(30))) - (fy/(2+2*sin(30))) - (torque/(2*R*(1+sin(30))))); //right 
+  motor_values[1] = ((fx/(2*cos(30))) + (fy/(2+2*sin(30))) + (torque/(2*R*(1+sin(30)))))*.5; //left
+  motor_values[2] = ((-fy/(1+sin(30))) + (torque * sin(30)/(R*(1 + sin(30))))); //rear
+  set_motors(motor_values);
+}
+
+
+
+void set_hovercraft_forces2(float fx, float fy, float torque) { //second hovercraft forces function for the sake of the directional movement
+
+  /*
+  set_hovercraft_forces function
+
+  Inputs: 
+  - fx
+  - fy
+  - torque
+
+  Outputs:
+  - motor_values[0]
+  - motor_values[1]
+  - motor_values[2]
+
+  Description:
+  This function uses inverse kinematics to determine how much each motor needs to work to
+  achieve the desired forces and torques.
+  */
+
+  // setting the radius of the hovercraft to 5.5 inches
+  int R = 5.5;
+ 
+  // using inverse kinematics matrix to define the motor speeds
+  motor_values[0] = -((fx/(2*cos(30))) - (fy/(2+2*sin(30))) - (torque/(2*R*(1+sin(30)))))*.5; //scalar multiplier to nerf overpowered fan (right)
+  motor_values[1] = ((fx/(2*cos(30))) + (fy/(2+2*sin(30))) + (torque/(2*R*(1+sin(30)))))*.5; //scalar multiplier to nerf overpowered fan (left)
+  motor_values[2] = -((-fy/(1+sin(30))) + (torque * sin(30)/(R*(1 + sin(30))))); //no multiplier here - this should remain the same as to ensure the blue fan has the highest output (rear)
   set_motors(motor_values);
 }
 
@@ -276,7 +308,7 @@ void fsm_step() {
 
 // STATE_LIFT_UP: set central fan to a 25-40% duty cycle (255 = 100% duty cycle)
         case STATE_LIFT_UP:
-            fan.write(90);
+            fan.write(102);
 
 // after 300 cycles (15 seconds), transition to the next state (STATE_POSITIVE_TORQUE) and reset the counter
             if (++counter >= 300) {
@@ -289,7 +321,7 @@ void fsm_step() {
 
 // STATE_POSITIVE_TORQUE: ramp up motors 0, 1, and 2 to the duty cycle speed to create a positive torque
         case STATE_POSITIVE_TORQUE:
-            set_hovercraft_forces(0, 0, 10);
+            set_hovercraft_forces(0, 0, 60);
 
 // after 300 cycles (15 seconds), transition to the next state (STATE_NEGATIVE_TORQUE) and reset the counter
             if (++counter >= 300) {
@@ -329,7 +361,7 @@ void fsm_step() {
 
 // STATE_LIFT_UP_2: turn on central fan and wait for 10 seconds
         case STATE_LIFT_UP_2:
-            fan.write(90);
+            fan.write(102);
 
 // after 200 cycles (10 seconds), transition to the next state (STATE_FORWARD_FORCE) and reset counter
             if (++counter >= 200) {
@@ -342,7 +374,7 @@ void fsm_step() {
 
 // STATE_FORWARD_FORCE: Move forwards (+x)
         case STATE_FORWARD_FORCE:
-		set_hovercraft_forces(10, 0, 0);
+		set_hovercraft_forces(-64, 0, 0);
             
 // after 300 cycles (15 seconds), transition to the next state (STATE_BACKWARD_FORCE) and reset counter
             if (++counter >= 300) {
@@ -355,7 +387,7 @@ void fsm_step() {
 
 // STATE_BACKWARD_FORCE: generate backward force by calling set_hovercraft_forces function
         case STATE_BACKWARD_FORCE:
-        set_hovercraft_forces(-10, 0, 0);
+        set_hovercraft_forces(64, 0, 0);
 
 // after 300 cycles (15 seconds), transition to the next state (STATE_FANS_OFF_2)
             if (++counter >= 300) {
@@ -382,7 +414,7 @@ void fsm_step() {
    
 // STATE_LIFT_UP_3: turn on central fan for 10 seconds
         case STATE_LIFT_UP_3:
-            fan.write(90);
+            fan.write(102);
 
 // after 200 cycles (10 seconds), transition to the next state (STATE_RIGHT_FORCE)
             if (++counter >= 200) {
@@ -395,7 +427,7 @@ void fsm_step() {
 
 // STATE_RIGHT_FORCE: generate right force by calling set_hovercraft_forces function
         case STATE_RIGHT_FORCE:
-        set_hovercraft_forces(0, -10, 0);
+        set_hovercraft_forces2(0, -60, 0);
 				
 // after 300 cycles (15 seconds), transition to the next state (STATE_LEFT_FORCE)
             if (++counter >= 300) {
@@ -408,7 +440,7 @@ void fsm_step() {
 			
 // STATE_LEFT_FORCE: generate left force by calling set_hovercraft_forces function
         case STATE_LEFT_FORCE:
-        set_hovercraft_forces(0, 10, 0);
+        set_hovercraft_forces2(0, 60, 0);
 		
 // after 300 cycles (15 seconds), transition to the next state (STATE_FANS_OFF_3)
             if (++counter >= 300) {
