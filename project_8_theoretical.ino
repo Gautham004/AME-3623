@@ -1,5 +1,5 @@
 //************************************************************************************
-// Project 7: Yaw control
+// Project 8: Obstacle avoidance
 // Team 3   : Niels Larsen, Juan Oulon, Gautham Chandra, Andrew Martinez, Deepak Jha
 // Date     : 04-03-2025
 //************************************************************************************
@@ -89,7 +89,8 @@ float compute_error(float theta, float heading_goal) {
   } else if (error <= -180) {
     error = -180;
   } else {
-    Serial.println("Issue with bounding in the compute_error function");
+    error = error;
+    //Serial.println("Issue with bounding in the compute_error function");
   }
   return error;
 }
@@ -178,8 +179,8 @@ float db_clip(float error, float deadband, float saturation) {
     float yawRate = gyro.z();      // deg/s
     const float Kd = 0.25f;                       // derivative gain
     const float Kp = 0.25f;                       // needs to be tuned*****
-    const float Kpx = 0.25f;                       // needs to be tuned*****
-    const float Kpy = 0.25f;                       // needs to be tuned*****
+    const float Kpx = 0.75f;                       // needs to be tuned*****
+    const float Kpy = 0.75f;                       // needs to be tuned*****
     const float deadband = 0.5f;                  // deg/s threshold
     const float saturation = 45.0f;                 // deg saturation
     const float maxTorque = DUTY_CYCLE;           // clamp to PWM range
@@ -195,14 +196,14 @@ float db_clip(float error, float deadband, float saturation) {
   float base_strength_left  = 0.0f;
   float base_strength_rear  = 0.0f;
 
-  if (distance_right <= 10.0f){
-     base_strength_right = 10.0f * (1.0f / distance_right);
+  if (distance_right <= 40.0f){
+     base_strength_right = 100.0f * (1.0f / distance_right);
   }
-  if (distance_left  <= 10.0f) {
-     base_strength_left  = 10.0f * (1.0f / distance_left);
+  if (distance_left  <= 40.0f) {
+     base_strength_left  = 100.0f * (1.0f / distance_left);
   }
-  if (distance_rear  <= 10.0f){
-    base_strength_rear  = 10.0f * (1.0f / distance_rear);
+  if (distance_rear  <= 40.0f){
+    base_strength_rear  = 100.0f * (1.0f / distance_rear);
   }
 
 
