@@ -31,8 +31,6 @@ const int CENTRAL_FAN_PWM = 23; // Central fan PWM pin
 #define FSM_INTERVAL 500       // FSM update interval (ms)
 #define IMU_INTERVAL 5         // IMU update interval (ms)
 
-// IMU object setup (I2C address 0x28)
-Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
 // FSM state definitions
 typedef enum {
