@@ -113,6 +113,11 @@ float db_clip(float error, float deadband, float saturation) {
     analogWrite(pwmPin, abs((int)val));
   }
 
+  // Function to convert sensor readings to distance using the correct equation
+float convertToDistance(int sensorValue) {
+    return -5 * (sqrt(3)*sqrt(429200*sensorValue - 43938933.0) - 34131.0) / 3219.0;
+}
+
   //void sensor_display
   void sensor_display(){
     int val1 = analogRead(left_sensor);
@@ -121,7 +126,7 @@ float db_clip(float error, float deadband, float saturation) {
     //convert analogs to usable distances
     float distance_right = convertToDistance(val2);
     float distance_left = convertToDistance(val1);
-    float distaance_rear = convertToDistance(val3);
+    float distance_rear = convertToDistance(val3);
     Serial.printf("right sensor: %.2f cm, left sensor: %.2f, rear sensor: %.2f", distance_right, distance_left, distance_rear);
   }
 
