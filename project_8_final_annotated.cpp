@@ -221,8 +221,8 @@ if (distance_right >= 80.0f || distance_right <=0){
     
    
     //translate the strengths into hovercraft forces
-    int horizontal_forces = Kpy*(((sqrt(3)/2)*base_strength_right) - ((sqrt(3)/2)*base_strength_left));
-    int vertical_forces = Kpx*(base_strength_rear- (0.5*base_strength_right) - (0.5*base_strength_left)); 
+    int horizontal_forces = Kpy*((80-((sqrt(3)/2)*base_strength_right)) - (80-(sqrt(3)/2)*base_strength_left));
+    int vertical_forces = Kpx*((80-base_strength_rear) - (80-(0.5*base_strength_right)) - (80-(0.5*base_strength_left))); 
 
   
    
