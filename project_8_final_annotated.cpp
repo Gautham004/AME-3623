@@ -196,14 +196,24 @@ float db_clip(float error, float deadband, float saturation) {
   float base_strength_left  = 0.0f;
   float base_strength_rear  = 0.0f;
 
-  if (distance_right <= 40.0f){
-     base_strength_right = 100.0f * (1.0f / distance_right);
+if (distance_right >= 80.0f || distance_right <=0){
+     base_strength_right = 0;
   }
-  if (distance_left  <= 40.0f) {
-     base_strength_left  = 100.0f * (1.0f / distance_left);
+  else {
+    base_strength_right = distance_right;
   }
-  if (distance_rear  <= 40.0f){
-    base_strength_rear  = 100.0f * (1.0f / distance_rear);
+  if (distance_left  >= 80.0f || distance_left<=0) {
+     base_strength_left  = 0;
+  }
+  else {
+    base_strength_left = distance_left;
+  }
+  
+  if (distance_rear >= 80.0f || distance_rear <=0){
+     base_strength_rear = 0;
+  }
+  else {
+    base_strength_rear = distance_rear;
   }
 
 
